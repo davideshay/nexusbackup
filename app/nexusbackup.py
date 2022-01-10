@@ -13,7 +13,7 @@ def delete_existing_backups():
         try:
             os.unlink(f)
         except OSError as e:
-            print("Error: %s %s" % (f,e.strerror))
+            print("Error: %s %s" % (f,e.strerror),flush=True)
             success=False
     return f"I {datetime.now()} Deleted existing backup files"
 
@@ -55,14 +55,11 @@ def waiting_backup(initial_last_run_date):
 def tar_backup_files(backup_file_name):
     success=True
     with tarfile.open(backup_file_name,"a:") as tar:
-        files = glob.glob(backup_dir+'/*.bak')
-        for f in files:
-            try:
-                print("backing up file "+str(f))
-                tar.add(f)
-            except OSError as e:
-                print("Error: %s %s" % (f,e.strerror))
-                success=False
+        try:
+            tar.add(f"{backup_dir}/")
+        except OSError as e:
+            print("Error: %s %s" % (f,e.strerror),flush=True)
+            success=False
         tar.close()
     if success:
         reply=f"I {datetime.now()} Backup bundled/tar created"
@@ -76,7 +73,7 @@ def tar_blob_files(backup_file_name):
         try:
             tar.add(f"{blob_dir}/")
         except OSError as e:
-            print(f"Error {f} {e.strerror}")
+            print(f"Error {f} {e.strerror}",flush=True)
             success=False
         tar.close()
     if success:
@@ -91,7 +88,7 @@ def tar_keystore_files(backup_file_name):
         try:
             tar.add(f"{id_dir}/")
         except OSError as e:
-            print(f"Error {f} {e.strerror}")
+            print(f"Error {f} {e.strerror}",flush=True)
             success=False
         tar.close()
     if success:
@@ -105,7 +102,7 @@ async def backup(websocket):
         if message=="start":
             backup_run_time=datetime.now().strftime('%Y%m%d-%H%M')
             backup_file_name=f"{target_dir}/nxsbackup-{backup_run_time}.tar"
-            print(f"I {datetime.now()} Backup process initiated...")
+            print(f"I {datetime.now()} Backup process initiated...",flush=True)
             backupdetails=delete_existing_backups()
             await websocket.send(backupdetails)
             initial_last_run_date=get_last_backup_run()
@@ -125,12 +122,11 @@ async def backup(websocket):
             await websocket.send(backupdetails)
             backupdetails="end"
             await websocket.send(backupdetails)
-            print(f"I {datetime.now()} Backup process completed...")
+            print(f"I {datetime.now()} Backup process completed...",flush=True)
 
 async def main():
     async with serve(backup, "0.0.0.0", 8000,ping_timeout=None,close_timeout=None):
         await asyncio.Future()  # run forever
-
 
 backup_dir=os.environ.get('BACKUPDIR')
 nexus_base_dir=os.environ.get('NEXUSBASEDIR')
@@ -143,8 +139,5 @@ nexus_svc_port=os.environ.get('NEXUS_SVC_PORT')
 nexus_svc_url="http://"+nexus_svc_hostname+":"+nexus_svc_port
 blob_dir=f"{nexus_base_dir}/blobs"
 id_dir=f"{nexus_base_dir}/keystores/node"
-
-
-
 
 asyncio.run(main())
