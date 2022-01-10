@@ -9,7 +9,7 @@ def delete_existing_backups():
     for f in files:
         print("attempting to delete file "+f,flush=True)
         try:
-            f.unlink()
+            os.unlink(f)
         except OSError as e:
             print("Error: %s %s" % (f,e.strerror))
     return "Deleted files..."
@@ -52,7 +52,7 @@ async def backup(websocket):
 
 
 async def main():
-    async with serve(backup, "0.0.0.0", 80):
+    async with serve(backup, "0.0.0.0", 8000):
         await asyncio.Future()  # run forever
 
 
