@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 
 COPY app/* /app
 
-CMD [ "python", "/app/nxsbackup.py"]
+CMD [ "python", "/app/nexusbackup.py"]
