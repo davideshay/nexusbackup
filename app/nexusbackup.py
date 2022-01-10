@@ -8,7 +8,7 @@ from datetime import datetime
 
 def delete_existing_backups():
     success=True
-    files = glob.glob(backup_dir+'/*')
+    files = glob.glob(full_backup_dir+'/*')
     for f in files:
         try:
             os.unlink(f)
@@ -56,7 +56,7 @@ def tar_backup_files(backup_file_name):
     success=True
     with tarfile.open(backup_file_name,"a:") as tar:
         try:
-            tar.add(f"{backup_dir}/")
+            tar.add(full_backup_dir)
         except OSError as e:
             print("Error: %s %s" % (f,e.strerror),flush=True)
             success=False
@@ -139,5 +139,6 @@ nexus_svc_port=os.environ.get('NEXUS_SVC_PORT')
 nexus_svc_url="http://"+nexus_svc_hostname+":"+nexus_svc_port
 blob_dir=f"{nexus_base_dir}/blobs"
 id_dir=f"{nexus_base_dir}/keystores/node"
+full_backup_dir=f"{nexus_base_dir}/{backup_dir}/"
 
 asyncio.run(main())
