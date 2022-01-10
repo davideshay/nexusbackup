@@ -8,7 +8,7 @@ from datetime import datetime
 
 def delete_existing_backups():
     success=True
-    files = glob.glob(full_backup_dir+'/*')
+    files = glob.glob(full_backup_dir+'/*.bak')
     for f in files:
         try:
             os.unlink(f)
@@ -58,7 +58,7 @@ def tar_backup_files(backup_file_name):
         try:
             tar.add(full_backup_dir)
         except OSError as e:
-            print("Error: %s %s" % (f,e.strerror),flush=True)
+            print(f"Error: {e.strerror}",flush=True)
             success=False
         tar.close()
     if success:
@@ -73,7 +73,7 @@ def tar_blob_files(backup_file_name):
         try:
             tar.add(f"{blob_dir}/")
         except OSError as e:
-            print(f"Error {f} {e.strerror}",flush=True)
+            print(f"Error {e.strerror}",flush=True)
             success=False
         tar.close()
     if success:
@@ -88,7 +88,7 @@ def tar_keystore_files(backup_file_name):
         try:
             tar.add(f"{id_dir}/")
         except OSError as e:
-            print(f"Error {f} {e.strerror}",flush=True)
+            print(f"Error {e.strerror}",flush=True)
             success=False
         tar.close()
     if success:
@@ -106,7 +106,7 @@ async def backup(websocket):
             backupdetails=delete_existing_backups()
             await websocket.send(backupdetails)
             initial_last_run_date=get_last_backup_run()
-            backupdetails=f"I {datetime.now()} Last run  of backup was {initial_last_run_date}"
+            backupdetails=f"I {datetime.now()} Last run of backup was {initial_last_run_date}"
             await websocket.send(backupdetails)
             backupdetails=starting_backup()
             await websocket.send(backupdetails)
