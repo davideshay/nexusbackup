@@ -1,10 +1,12 @@
 import asyncio
 from websockets import serve
 import time, sys, os, glob
+import requests
+from requests.auth import HTTPBasicAuth
+import time, ciso8601
 
 
 def delete_existing_backups():
-    print("backup dir is "+backup_dir)
     files = glob.glob(backup_dir+'/*')
     for f in files:
         print("attempting to delete file "+f,flush=True)
@@ -14,10 +16,45 @@ def delete_existing_backups():
             print("Error: %s %s" % (f,e.strerror))
     return "Deleted files..."
 
+def get_last_backup_run()
+    response = requests.get(nexus_svc_url+"/service/rest/v1/tasks/"+task_id, \
+        auth = HTTPBasicAuth(nexus_username, nexus_password))
+    if response.status_code in 200:
+        print("initial get response content is:",flush=True)
+        answer=response.json()
+        print(answer)
+        last_run=answer["lastRun"]
+
+        print("answer.lastRun " + answer["lastRun"])
+
+
+
+
 def starting_backup():
-    return "Started backup"
+    response = requests.post(nexus_svc_url+"/service/rest/v1/tasks/" + task_id + "/run", \
+       auth = HTTPBasicAuth(nexus_username, nexus_password))
+    if response.status_code in (200,204):
+        reply="Backup Task Successfully started..."
+    else:
+        reply="Error starting task, status was "+str(response.status_code)
+    return reply
 
 def waiting_backup():
+    task_finished=False
+    while not task_finished:
+        response = requests.get(nexus_svc_url+"/service/rest/v1/tasks/"+task_id, \
+            auth = HTTPBasicAuth(nexus_username, nexus_password))
+        print("response content is:",flush=True)
+        answer=response.json()
+        print(answer)
+        print("answer.currentState " + answer["currentState"])
+
+        time.sleep(2)
+
+
+
+
+
     return "Waiting for backup to complete"
 
 def bundle_files():
@@ -57,6 +94,11 @@ async def main():
 
 
 backup_dir=os.environ.get('BACKUPDIR')
-
+task_id=os.environ.get('TASKID')
+nexus_username=os.environ.get('NEXUS_USERNAME')
+nexus_password=os.environ.get('NEXUS_PASSWORD')
+nexus_svc_hostname=os.environ.get('NEXUS_SERVICE_HOST')
+nexus_svc_port=os.environ.get('NEXUS_SERVICE_PORT_WEB')
+nexus_svc_url="http://"+nexus_svc_hostname+":"+nexus_svc_port
 
 asyncio.run(main())
