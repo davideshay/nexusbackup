@@ -1,4 +1,4 @@
-name: build-publish-docker-jobrunner
+name: build-publish-docker-nexusbackup
 on:
   push:
     branches:
@@ -37,6 +37,6 @@ jobs:
         with:
           user: ${{ secrets.DOCKER_USERNAME }}
           pass: ${{ secrets.DOCKER_PASSWORD }}
-          slug: davideshay/vulnscan-jobrunner
+          slug: davideshay/nexusbackup
           readme: README.md
-          description: Job sequential runner for VULNSCAN
+          description: Sonatype Nexus Backup repository
